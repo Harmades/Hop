@@ -6,8 +6,34 @@
              xmlns:local="clr-namespace:Hop.App.Views"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <StackPanel>
-        <TextBlock Text="{Binding Text}" />
-        <Button Command="{Binding Change}" Content="Change" />
-    </StackPanel>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height = "Auto"/>
+            <RowDefinition Height = "*" />
+        </Grid.RowDefinitions>
+        <TextBox Grid.Row = "0" Text = "{ Binding Query, Delay = 300 }"/>
+        <ListBox Grid.Row = "1" ItemsSource = "{ Binding Items }">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Column = "0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition />
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row = "0" Text = "{ Binding Name }" />
+                                <TextBlock Grid.Row = "1" Text = "{ Binding Description }" />
+                            </Grid>
+                        </Grid>
+                        <Image Grid.Column = "1" Source = "{ Binding Image }" />
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
 </Window>

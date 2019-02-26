@@ -9,6 +9,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Hop.App.Views\Hop.App.Views.csproj" />
+    <ProjectReference Include="..\Hop.Core\Hop.Core.fsproj" />
     <PackageReference Include="Elmish.WPF" Version="2.0.0-beta-8" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />

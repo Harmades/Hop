@@ -5,8 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Function.fs" />
-    <Compile Include="IO.fs" />
+    <Compile Include="All.fs" />
   </ItemGroup>
 
 </Project>

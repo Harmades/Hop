@@ -2,28 +2,45 @@
 open Elmish.WPF
 open Hop.App.Views
 open System
+open Hop.Core.All
+open Elmish.WPF.Utilities
 
 type Model =
     {
-        Text: string
+        Query: string
+        Items: Item seq
     }
+
+let designItems = 
+    [
+        { Name = "Turn Off"; Description = "Turn the computer off"; Image = ""; Data = None }
+        { Name = "Reboot"; Description = "Reboot the computer off"; Image = ""; Data = None }
+    ]
 
 let init () =
     {
-        Text = "Hay"
+        Query = "";
+        Items = designItems
     }
 
 type Message =
-    | Change
+    | Query of string
 
 let update message model =
     match message with
-        | Change -> { model with Text = if model.Text = "Hay" then "Hoy" else "Hay" }
+        | Query query -> { model with Query = query }
+
+let itemBindings () =
+    [
+        "Name" |> Binding.oneWay (fun (m, i) -> i.Name)
+        "Description" |> Binding.oneWay (fun (m, i) -> i.Description)
+        "Image" |> Binding.oneWay (fun (m, i) -> i.Image)
+    ]
 
 let bindings model dispatch =
     [
-        "Change" |> Binding.cmd (fun m -> Change)
-        "Text" |> Binding.oneWay (fun m -> m.Text)
+        "Query" |> Binding.oneWay (fun m -> m.Query)
+        "Items" |> Binding.subBindingSeq id (fun m -> m.Items) (fun i -> i.Name) itemBindings
     ]
 
 [<EntryPoint; STAThread>]
