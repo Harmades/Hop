@@ -1,7 +1,7 @@
 ﻿open Hop.Core.All
 open System
-open System.Windows.Forms
-open System.Drawing
+open System.Windows
+open System.Windows.Controls
 
 type Model =
     {
@@ -25,54 +25,10 @@ let init () =
     { Arguments = arguments; Items = results; Message = String.Empty; Hop = hop }
 
 let view model =
-    //let searchPanel = new FlowLayoutPanel ()
-    //searchPanel.Dock <- DockStyle.Top
-    //for argument in model.Arguments.Tail do
-    //    let panel = new FlowLayoutPanel ()
-    //    let nameLabel = new Label ()
-    //    nameLabel.Text <- argument.Name
-    //    nameLabel.Dock <- DockStyle.Fill
-    //    panel.Controls.Add nameLabel
-    //    let pictureBox = new PictureBox ()
-    //    if argument.Image <> String.Empty then
-    //        let bitmap = new Bitmap (argument.Image)
-    //        pictureBox.Image <- bitmap
-    //        pictureBox.Dock <- DockStyle.Right
-    //        panel.Controls.Add pictureBox
-    //    searchPanel.Controls.Add panel
-    //let queryTextBox = new TextBox ()
-    //queryTextBox.Text <- model.Arguments.Head
-    //queryTextBox.Dock <- DockStyle.Right
-    //searchPanel.Controls.Add queryTextBox
-    
-    let itemsLayoutPanel = new FlowLayoutPanel ()
-    itemsLayoutPanel.Dock <- DockStyle.Fill
-    itemsLayoutPanel.FlowDirection <- FlowDirection.TopDown
-    for item in model.Items do
-        let panel = new FlowLayoutPanel ()
-        let nameLabel = new Label ()
-        nameLabel.Text <- item.Name
-        //nameLabel.Dock <- DockStyle.Top
-        panel.Controls.Add nameLabel
-        itemsLayoutPanel.Controls.Add nameLabel
-        let descriptionLabel = new Label ()
-        descriptionLabel.Text <- item.Description
-        descriptionLabel.Dock <- DockStyle.Bottom
-        panel.Controls.Add descriptionLabel
-        let pictureBox = new PictureBox ()
-        if item.Image <> String.Empty then
-            let bitmap = new Bitmap (item.Image)
-            pictureBox.Image <- bitmap
-            pictureBox.Dock <- DockStyle.Right
-            panel.Controls.Add pictureBox
-        //itemsLayoutPanel.Controls.Add panel
-    
-    let rootPanel = new FlowLayoutPanel ()
-    rootPanel.Controls.Add itemsLayoutPanel
-
-    let form = new Form ()
-    form.Controls.Add itemsLayoutPanel
-    form
+    let mainGrid = new Grid ()
+    mainGrid.ColumnDefinitions.Add (ColumnDefinition())
+    mainGrid.ColumnDefinitions.Add (ColumnDefinition())
+    mainGrid
 
 let update model message =
     match message with
@@ -95,9 +51,6 @@ let update model message =
 [<EntryPoint>]
 [<STAThread>]
 let main argv = 
-    Application.EnableVisualStyles ()
-    Application.SetCompatibleTextRenderingDefault false
-    let model = init ()
-    let view = view model
-    Application.Run view
-    0
+    let app = new Application ()
+    let mainWindow = new Window ()
+    app.Run mainWindow
