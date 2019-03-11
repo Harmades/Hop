@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <Compile Include="All.fs" />
+    <Compile Include="FileSystemModule.fs" />
   </ItemGroup>
 
 </Project>
