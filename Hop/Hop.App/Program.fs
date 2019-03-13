@@ -1,10 +1,9 @@
 ﻿open Hop.Core.All
+open Hop.App.Views
 open System
 open System.Windows
-open System.Windows.Controls
-open System.Windows.Media
-open System.Windows.Media.Imaging
 open System.Windows.Input
+open System.ComponentModel
 
 type Model =
     {
@@ -36,63 +35,6 @@ let createCommand execute =
             member this.remove_CanExecuteChanged(_) = ()
     }
 
-let view model =
-    let argumentsGrid = new Grid ()
-    argumentsGrid.ColumnDefinitions.Add (ColumnDefinition( Width = GridLength.Auto ))
-    argumentsGrid.ColumnDefinitions.Add (ColumnDefinition())
-    let argumentsListView = new ListView ()
-    for item in model.Arguments.Tail do
-        let nameTextBlock = new TextBlock ( Text = item.Name )
-        //let image = new Image ( Source = new BitmapImage (new Uri(item.Image)) )
-        let itemGrid = new Grid ()
-        itemGrid.ColumnDefinitions.Add (ColumnDefinition())
-        itemGrid.ColumnDefinitions.Add (ColumnDefinition())
-        itemGrid.Children.Add nameTextBlock |> ignore
-        //itemGrid.Children.Add image |> ignore
-        Grid.SetColumn (nameTextBlock, 0)
-        //Grid.SetColumn (image, 1)
-        let listViewItem = new ListViewItem ( Content = itemGrid )
-        argumentsListView.Items.Add listViewItem |> ignore
-    let queryTextBox = new TextBox ( Text = model.Arguments.Head )
-    Grid.SetColumn (argumentsListView, 0)
-    Grid.SetColumn (queryTextBox, 1)
-    argumentsGrid.Children.Add argumentsListView |> ignore
-    argumentsGrid.Children.Add queryTextBox |> ignore
-
-    let itemListView = new ListView ()
-    itemListView.InputBindings.Add (new InputBinding(createCommand (fun o -> )))
-    for item in model.Items do
-        let itemGrid = new Grid ()
-        itemGrid.ColumnDefinitions.Add (ColumnDefinition())
-        itemGrid.ColumnDefinitions.Add (ColumnDefinition())
-        let identifierGrid = new Grid ()
-        identifierGrid.RowDefinitions.Add (RowDefinition())
-        identifierGrid.RowDefinitions.Add (RowDefinition())
-        let nameTextBlock = new TextBlock ( Text = item.Name )
-        let descriptionTextBlock = new TextBlock ( Text = item.Description )
-        //let image = new Image ( Source = new BitmapImage (new Uri(item.Image)) )
-        Grid.SetRow (nameTextBlock, 0)
-        Grid.SetRow (descriptionTextBlock, 1)
-        identifierGrid.Children.Add nameTextBlock |> ignore
-        identifierGrid.Children.Add descriptionTextBlock |> ignore
-        Grid.SetColumn (identifierGrid, 0)
-        //Grid.SetColumn (image, 1)
-        itemGrid.Children.Add identifierGrid |> ignore
-        //itemGrid.Children.Add image |> ignore
-        let listViewItem = new ListViewItem ( Content = itemGrid )
-        itemListView.Items.Add listViewItem |> ignore
-
-    let mainGrid = new Grid ()
-    mainGrid.RowDefinitions.Add (RowDefinition( Height = GridLength.Auto ))
-    mainGrid.RowDefinitions.Add (RowDefinition())
-    Grid.SetRow (argumentsGrid, 0)
-    Grid.SetRow (itemListView, 1)
-    mainGrid.Children.Add argumentsGrid |> ignore
-    mainGrid.Children.Add itemListView |> ignore
-    let window = new Window ()
-    window.Content <- mainGrid
-    window
-
 let update model message =
     match message with
         | Push item ->
@@ -101,7 +43,8 @@ let update model message =
             { model with Arguments = arguments; Items = items }
         | Pop ->
             let arguments = { model.Arguments with Head = ""; Tail = model.Arguments.Tail.Tail }
-            { model with Arguments = arguments}
+            let items = autocomplete arguments model.Hop
+            { model with Arguments = arguments; Items = items }
         | Query query ->
             let arguments = { model.Arguments with Head = query }
             let results = autocomplete arguments model.Hop
@@ -111,10 +54,41 @@ let update model message =
             let result = execute arguments model.Hop
             { Arguments = { Head = ""; Tail = [] }; Items = []; Hop = model.Hop; Message = result }
 
+type ItemViewModel(model: Item) =
+    member val Model = model with get, set
+    member this.Name with get () = this.Model.Name
+    member this.Description with get () = this.Model.Description
+    member this.Image with get () = this.Model.Image
+    member this.Module with get () = this.Model.Module
+
+type MainViewModel(model: Model) =
+    let ev = new Event<_,_>()
+    member val Model = model with get, set
+    member this.Query
+        with get () = this.Model.Arguments.Head
+        and set (value) = this.Update (Query value)
+    member this.Arguments = this.Model.Arguments.Tail |> List.map ItemViewModel |> List.rev
+    member this.Items = this.Model.Items |> Seq.map ItemViewModel
+    member this.PushCommand = createCommand (fun o -> this.Update (Push (o :?> ItemViewModel).Model))
+    member this.PopCommand = createCommand (fun _ -> this.Update Pop)
+    member this.ExecuteCommand (item: obj) = this.Update (Execute (item :?> ItemViewModel).Model)
+    member private this.Update message =
+        this.Model <- update this.Model message
+        ev.Trigger (this, new PropertyChangedEventArgs "Query")
+        ev.Trigger (this, new PropertyChangedEventArgs "Items")
+        ev.Trigger (this, new PropertyChangedEventArgs "Arguments")
+
+    interface INotifyPropertyChanged with
+        [<CLIEvent>]
+        member this.PropertyChanged = ev.Publish
+
+let bind model = new MainViewModel(model)
+
 [<EntryPoint>]
 [<STAThread>]
 let main argv = 
     let app = new Application ()
     let model = init ()
-    let mainWindow = view model
+    let viewModel = bind model
+    let mainWindow = new MainWindow ( DataContext = viewModel )
     app.Run mainWindow

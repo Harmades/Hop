@@ -9,4 +9,6 @@
     <Compile Include="FileSystemModule.fs" />
   </ItemGroup>
 
+  <ItemGroup />
+
 </Project>
