@@ -11,6 +11,7 @@ module All =
             Image: string
             Data: obj
             Module: string
+            Action: Action
         }
 
     type Arguments =
@@ -19,15 +20,12 @@ module All =
             Tail: Item list
         }
 
-    type Query =
-        | Autocomplete of Arguments
-        | Execute of Item list
-
     type Result =
-        | Message of string
-        | Autocomplete of Item seq
+        {
+            Items: Item seq
+        }
 
-    type Main = Func<Query, Result>
+    type Main = Func<Arguments, Result>
 
     [<AllowNullLiteral>]
     type ModuleEntryPointAttribute () = inherit Attribute ()
@@ -50,15 +48,9 @@ module All =
 
     let createFromAssemblies assemblies = assemblies |> List.map compose |> Map.ofList
 
-    let private executeImpl query hop = hop.Modules |> Map.map (fun _ main -> main.Invoke query) |> Map.toList |> List.map (fun (_, m) -> m)
-
-    let autocomplete arguments hop =
-        executeImpl (Query.Autocomplete arguments) hop
-        |> Seq.choose (fun result -> match result with | Result.Autocomplete items -> Some items | _ -> None)
-        |> Seq.collect id
-
-    let execute (items: Item list) hop =
-        let main = hop.Modules.[items.Head.Module]
-        match main.Invoke (Query.Execute items) with
-            | Result.Message message -> message
-            | _ -> failwith "Execute yielded invalid result"
+    let execute query hop =
+        hop.Modules
+        |> Map.map (fun _ main -> main.Invoke query)
+        |> Map.toSeq
+        |> Seq.collect (fun (_, m) -> m.Items)
+        |> (fun items -> { Items = items })

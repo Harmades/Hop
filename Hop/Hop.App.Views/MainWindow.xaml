@@ -46,6 +46,7 @@
             <ListView.InputBindings>
                 <KeyBinding Key="Tab" Command="{ Binding PushCommand }" CommandParameter="{ Binding ElementName=ItemsListView, Path=SelectedItem }" />
                 <KeyBinding Modifiers="Shift" Key="Tab" Command="{ Binding PopCommand }" />
+                <KeyBinding Key="Return" Command="{ Binding ExecuteCommand }" CommandParameter="{ Binding ElementName=ItemsListView, Path=SelectedItem }" />
             </ListView.InputBindings>
             <ListView.ItemTemplate>
                 <DataTemplate>

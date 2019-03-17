@@ -43,7 +43,7 @@ namespace Hop.App.Views
 
         private void FocusTextBox(object sender, KeyEventArgs e)
         {
-            if (e.Key != Key.Down && e.Key != Key.Up && e.Key != Key.Tab && e.Key != Key.LeftShift)
+            if (e.Key != Key.Down && e.Key != Key.Up && e.Key != Key.Tab && e.Key != Key.LeftShift && e.Key != Key.Return)
             {
                 MoveFocus();
                 this.QueryTextBox.RaiseEvent(e);

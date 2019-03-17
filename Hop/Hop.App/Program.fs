@@ -9,7 +9,6 @@ type Model =
     {
         Arguments: Arguments
         Items: Item seq
-        Message: string
         Hop: Hop
     }
 
@@ -22,9 +21,9 @@ type Message =
 let init () =
     let main = FileSystemModule.main
     let arguments = { Head = String.Empty; Tail = [FileSystemModule.init ()] }
-    let hop = { Modules = Map.empty |> Map.add "FileSystem" (Func<Query, Result>(main)) }
-    let results = autocomplete arguments hop
-    { Arguments = arguments; Items = results; Message = String.Empty; Hop = hop }
+    let hop = { Modules = Map.empty |> Map.add "FileSystem" (Func<Arguments, Result>(main)) }
+    let result = execute arguments hop
+    { Arguments = arguments; Items = result.Items; Hop = hop }
 
 let createCommand execute =
     {
@@ -39,20 +38,19 @@ let update model message =
     match message with
         | Push item ->
             let arguments = { Head = ""; Tail = item :: model.Arguments.Tail }
-            let items = autocomplete arguments model.Hop
-            { model with Arguments = arguments; Items = items }
+            let result = execute arguments model.Hop
+            { model with Arguments = arguments; Items = result.Items }
         | Pop ->
             let arguments = { model.Arguments with Head = ""; Tail = model.Arguments.Tail.Tail }
-            let items = autocomplete arguments model.Hop
-            { model with Arguments = arguments; Items = items }
+            let result = execute arguments model.Hop
+            { model with Arguments = arguments; Items = result.Items }
         | Query query ->
             let arguments = { model.Arguments with Head = query }
-            let results = autocomplete arguments model.Hop
-            { model with Arguments = arguments; Items = results }
-        | Execute item ->
-            let arguments = item :: model.Arguments.Tail
             let result = execute arguments model.Hop
-            { Arguments = { Head = ""; Tail = [] }; Items = []; Hop = model.Hop; Message = result }
+            { model with Arguments = arguments; Items = result.Items }
+        | Execute item ->
+            item.Action.Invoke()
+            init ()
 
 type ItemViewModel(model: Item) =
     member val Model = model with get, set
@@ -71,7 +69,7 @@ type MainViewModel(model: Model) =
     member this.Items = this.Model.Items |> Seq.map ItemViewModel
     member this.PushCommand = createCommand (fun o -> this.Update (Push (o :?> ItemViewModel).Model))
     member this.PopCommand = createCommand (fun _ -> this.Update Pop)
-    member this.ExecuteCommand (item: obj) = this.Update (Execute (item :?> ItemViewModel).Model)
+    member this.ExecuteCommand = createCommand (fun o -> this.Update (Execute (o :?> ItemViewModel).Model))
     member private this.Update message =
         this.Model <- update this.Model message
         ev.Trigger (this, new PropertyChangedEventArgs "Query")
