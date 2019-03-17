@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Hop.App.Views"
-             mc:Ignorable="d" 
+             mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <Grid.RowDefinitions>
@@ -16,7 +16,12 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
-            <ListView Grid.Column="0" ItemsSource="{ Binding Arguments }">
+            <ListView Grid.Column="0" Name="ArgumentsListView" ItemsSource="{ Binding Arguments }">
+                <ListView.Resources>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="Focusable" Value="False" />
+                    </Style>
+                </ListView.Resources>
                 <ListView.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel Orientation="Horizontal" />
@@ -35,9 +40,9 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-            <TextBox Grid.Column="1" Text="{ Binding Query, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Grid.Column="1" Name="QueryTextBox" Text="{ Binding Query, UpdateSourceTrigger=PropertyChanged}" />
         </Grid>
-        <ListView Name="ItemsListView" Grid.Row="1" ItemsSource="{ Binding Items }">
+        <ListView Name="ItemsListView" Grid.Row="1" ItemsSource="{ Binding Items, NotifyOnTargetUpdated=True}" Focusable="False">
             <ListView.InputBindings>
                 <KeyBinding Key="Tab" Command="{ Binding PushCommand }" CommandParameter="{ Binding ElementName=ItemsListView, Path=SelectedItem }" />
                 <KeyBinding Modifiers="Shift" Key="Tab" Command="{ Binding PopCommand }" />
