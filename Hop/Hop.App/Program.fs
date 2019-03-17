@@ -38,8 +38,10 @@ let update model message =
     match message with
         | Push item ->
             let arguments = { Head = ""; Tail = item :: model.Arguments.Tail }
-            let result = execute arguments model.Hop
-            { model with Arguments = arguments; Items = result.Items }
+            match execute arguments model.Hop with
+                | { Result.Items = items } when Seq.isEmpty items -> model
+                | { Result.Items = items } ->
+                    { model with Arguments = arguments; Items = items }
         | Pop ->
             let arguments = { model.Arguments with Head = ""; Tail = model.Arguments.Tail.Tail }
             let result = execute arguments model.Hop
