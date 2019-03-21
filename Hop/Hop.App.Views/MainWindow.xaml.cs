@@ -46,15 +46,25 @@ namespace Hop.App.Views
                 Text = "Open Hop"
             };
             openItem.Click += OpenHop;
+            var exitItem = new ToolStripMenuItem
+            {
+                Name = "Exit",
+                Text = "Exit"
+            };
+            exitItem.Click += Exit;
             contextMenuStrip.Items.Add(openItem);
+            contextMenuStrip.Items.Add(exitItem);
             this.TrayIcon.ContextMenuStrip = contextMenuStrip;
             this.TrayIcon.Icon = new Icon("D:/Hop/Hop/Hop.App/bin/Debug/net472/assets/Hop.ico");
             this.TrayIcon.Visible = true;
+            this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
         }
+
+        private void Exit(object sender, EventArgs e) => this.Close();
 
         private void OpenHop(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
+            this.Visibility = Visibility.Visible;
         }
 
         private void ItemsUpdated(object sender, DataTransferEventArgs e)

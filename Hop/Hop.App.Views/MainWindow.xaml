@@ -19,7 +19,7 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
-            <ListView Grid.Column="0" VerticalAlignment="Center" Name="ArgumentsListView" ItemsSource="{ Binding Arguments }">
+            <ListView Grid.Column="0" Background="#282a36" BorderThickness="0" VerticalAlignment="Center" Name="ArgumentsListView" ItemsSource="{ Binding Arguments }">
                 <ListView.Resources>
                     <Style TargetType="ListViewItem">
                         <Setter Property="Focusable" Value="False" />
@@ -37,15 +37,60 @@
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition />
                             </Grid.ColumnDefinitions>
-                            <Image Grid.Column="0" VerticalAlignment="Center" Source="{ Binding Image }" Width="20" />
-                            <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{ Binding Name }" />
+                            <Image Grid.Column="0" Margin="2 2 2 2" VerticalAlignment="Center" Source="{ Binding Image }" Width="20" />
+                            <TextBlock Grid.Column="1" Margin="2 2 2 2" VerticalAlignment="Center" Foreground="#bd93f9" Text="{ Binding Name }" FontSize="20" />
                         </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-            <TextBox Grid.Column="1" VerticalAlignment="Stretch" VerticalContentAlignment="Center" Name="QueryTextBox" Text="{ Binding Query, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Grid.Column="1" Background="#282a36" Foreground="#bd93f9" BorderThickness="0" FontSize="20" VerticalAlignment="Stretch" VerticalContentAlignment="Center" Name="QueryTextBox" Text="{ Binding Query, UpdateSourceTrigger=PropertyChanged}" />
         </Grid>
-        <ListView Name="ItemsListView" Grid.Row="1" ItemsSource="{ Binding Items, NotifyOnTargetUpdated=True}" Focusable="False">
+        <ListView Name="ItemsListView" Grid.Row="1" Background="#282a36" BorderThickness="0" ItemsSource="{ Binding Items, NotifyOnTargetUpdated=True}" Focusable="False">
+            <ListView.Resources>
+                <Style TargetType="{x:Type ListViewItem}">
+                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                <Border x:Name="Border"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Background="{TemplateBinding Background}"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="true">
+                                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <MultiTrigger>
+                                        <MultiTrigger.Conditions>
+                                            <Condition Property="Selector.IsSelectionActive"
+                                            Value="False" />
+                                            <Condition Property="IsSelected"
+                                            Value="True" />
+                                        </MultiTrigger.Conditions>
+                                        <Setter Property="Background"
+                                    TargetName="Border"
+                                    Value="#44475a" />
+                                    </MultiTrigger>
+                                    <MultiTrigger>
+                                        <MultiTrigger.Conditions>
+                                            <Condition Property="Selector.IsSelectionActive"
+                                            Value="True" />
+                                            <Condition Property="IsSelected"
+                                            Value="True" />
+                                        </MultiTrigger.Conditions>
+                                        <Setter Property="Background"
+                                    TargetName="Border"
+                                    Value="#44475a" />
+                                    </MultiTrigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ListView.Resources>
             <ListView.InputBindings>
                 <KeyBinding Key="Tab" Command="{ Binding PushCommand }" CommandParameter="{ Binding ElementName=ItemsListView, Path=SelectedItem }" />
                 <KeyBinding Modifiers="Shift" Key="Tab" Command="{ Binding PopCommand }" />
@@ -58,14 +103,14 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
-                        <Image Grid.Column="0" VerticalAlignment="Center" Source="{ Binding Image }" Width="40" />
+                        <Image Grid.Column="0" Margin="2 2 2 2" VerticalAlignment="Center" Source="{ Binding Image }" Width="40" />
                         <Grid Grid.Column="1">
                             <Grid.RowDefinitions>
                                 <RowDefinition />
                                 <RowDefinition />
                             </Grid.RowDefinitions>
-                            <TextBlock VerticalAlignment="Center" Grid.Row="0" Text="{ Binding Name }" />
-                            <TextBlock VerticalAlignment="Center" Grid.Row="1" Text="{ Binding Description }" />
+                            <TextBlock VerticalAlignment="Center" Margin="2 2 2 2" Foreground="#f8f8f2" Grid.Row="0" Text="{ Binding Name }" FontSize="16" />
+                            <TextBlock VerticalAlignment="Center" Margin="2 2 2 2" Foreground="#6272a4" Grid.Row="1" Text="{ Binding Description }" FontSize="12" />
                         </Grid>
                     </Grid>
                 </DataTemplate>

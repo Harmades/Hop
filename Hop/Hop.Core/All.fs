@@ -3,6 +3,7 @@ namespace Hop.Core
 module All =
     open System
     open System.Reflection
+    open System.IO
 
     type Item =
         {
@@ -47,6 +48,13 @@ module All =
         }
 
     let createFromAssemblies assemblies = assemblies |> List.map compose |> Map.ofList
+
+    let load modulesDirectory =
+        let mains =
+            Directory.GetFiles (modulesDirectory, "*.dll")
+            |> Array.map compose
+            |> Map.ofArray
+        { Modules = mains }
 
     let execute query hop =
         hop.Modules
