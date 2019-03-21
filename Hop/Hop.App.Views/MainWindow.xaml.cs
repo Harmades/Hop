@@ -1,20 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using System.Windows.Interop;
+using TrayIcon = System.Windows.Forms.NotifyIcon;
+using ContextMenuStrip = System.Windows.Forms.ContextMenuStrip;
+using ToolStripMenuItem = System.Windows.Forms.ToolStripMenuItem;
+using System.Drawing;
 
 namespace Hop.App.Views
 {
@@ -25,12 +19,42 @@ namespace Hop.App.Views
     {
         private static readonly TraversalRequest MoveFocusRequest = new TraversalRequest(FocusNavigationDirection.Next);
 
+        [DllImport("user32.dll")]
+        private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
+
+        [DllImport("user32.dll")]
+        private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
+
+        private const int HOTKEY_ID = 9000;
+        private const uint MOD_ALT = 0x0001;
+        private const uint VK_SPACE = 0x20;
+        private const int WM_HOTKEY = 0x0312;
+        private IntPtr _windowHandle;
+        private HwndSource _source;
+        private TrayIcon TrayIcon = new TrayIcon(); 
+
         public MainWindow()
         {
             InitializeComponent();
             this.QueryTextBox.PreviewKeyDown += HandleKeyDown;
             this.ItemsListView.PreviewKeyDown += FocusTextBox;
             this.ItemsListView.TargetUpdated += ItemsUpdated;
+            var contextMenuStrip = new ContextMenuStrip();
+            var openItem = new ToolStripMenuItem
+            {
+                Name = "OpenMenuItem",
+                Text = "Open Hop"
+            };
+            openItem.Click += OpenHop;
+            contextMenuStrip.Items.Add(openItem);
+            this.TrayIcon.ContextMenuStrip = contextMenuStrip;
+            this.TrayIcon.Icon = new Icon("D:/Hop/Hop/Hop.App/bin/Debug/net472/assets/Hop.ico");
+            this.TrayIcon.Visible = true;
+        }
+
+        private void OpenHop(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         private void ItemsUpdated(object sender, DataTransferEventArgs e)
@@ -65,5 +89,46 @@ namespace Hop.App.Views
         }
 
         private void MoveFocus() => (Keyboard.FocusedElement as UIElement)?.MoveFocus(MoveFocusRequest);
+
+
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            base.OnSourceInitialized(e);
+
+            _windowHandle = new WindowInteropHelper(this).Handle;
+            _source = HwndSource.FromHwnd(_windowHandle);
+            _source.AddHook(HwndHook);
+
+            RegisterHotKey(_windowHandle, HOTKEY_ID, MOD_ALT, VK_SPACE);
+        }
+
+        private IntPtr HwndHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            switch (msg)
+            {
+                case WM_HOTKEY:
+                    switch (wParam.ToInt32())
+                    {
+                        case HOTKEY_ID:
+                            int vkey = (((int)lParam >> 16) & 0xFFFF);
+                            if (vkey == VK_SPACE)
+                            {
+                                this.Visibility = this.Visibility == Visibility.Collapsed ? Visibility.Visible : Visibility.Collapsed;
+                            }
+                            handled = true;
+                            break;
+                    }
+                    break;
+            }
+            return IntPtr.Zero;
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            TrayIcon.Dispose();
+            _source.RemoveHook(HwndHook);
+            UnregisterHotKey(_windowHandle, HOTKEY_ID);
+            base.OnClosed(e);
+        }
     }
 }

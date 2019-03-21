@@ -4,8 +4,11 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Hop.App.Views"
+             WindowStyle="None"
+             ResizeMode="NoResize"
              mc:Ignorable="d"
-             d:DesignHeight="450" d:DesignWidth="800">
+             Width="700"
+             Height="400">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -16,7 +19,7 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
-            <ListView Grid.Column="0" Name="ArgumentsListView" ItemsSource="{ Binding Arguments }">
+            <ListView Grid.Column="0" VerticalAlignment="Center" Name="ArgumentsListView" ItemsSource="{ Binding Arguments }">
                 <ListView.Resources>
                     <Style TargetType="ListViewItem">
                         <Setter Property="Focusable" Value="False" />
@@ -31,16 +34,16 @@
                     <DataTemplate>
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition />
                                 <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition />
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="{ Binding Name }" />
-                            <!--<Image Grid.Column="1" Source="{ Binding Image }" />-->
+                            <Image Grid.Column="0" VerticalAlignment="Center" Source="{ Binding Image }" Width="20" />
+                            <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{ Binding Name }" />
                         </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-            <TextBox Grid.Column="1" Name="QueryTextBox" Text="{ Binding Query, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Grid.Column="1" VerticalAlignment="Stretch" VerticalContentAlignment="Center" Name="QueryTextBox" Text="{ Binding Query, UpdateSourceTrigger=PropertyChanged}" />
         </Grid>
         <ListView Name="ItemsListView" Grid.Row="1" ItemsSource="{ Binding Items, NotifyOnTargetUpdated=True}" Focusable="False">
             <ListView.InputBindings>
@@ -52,18 +55,18 @@
                 <DataTemplate>
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition />
                             <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition />
                         </Grid.ColumnDefinitions>
-                        <Grid Grid.Column="0">
+                        <Image Grid.Column="0" VerticalAlignment="Center" Source="{ Binding Image }" Width="40" />
+                        <Grid Grid.Column="1">
                             <Grid.RowDefinitions>
                                 <RowDefinition />
                                 <RowDefinition />
                             </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" Text="{ Binding Name }" />
-                            <TextBlock Grid.Row="1" Text="{ Binding Description }" />
+                            <TextBlock VerticalAlignment="Center" Grid.Row="0" Text="{ Binding Name }" />
+                            <TextBlock VerticalAlignment="Center" Grid.Row="1" Text="{ Binding Description }" />
                         </Grid>
-                        <!--<Image Grid.Column="1" Source="{ Binding Image }" />-->
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>
