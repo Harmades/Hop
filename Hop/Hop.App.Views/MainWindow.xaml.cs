@@ -81,6 +81,10 @@ namespace Hop.App.Views
 
         private void FocusTextBox(object sender, KeyEventArgs e)
         {
+            if (e.Key == Key.Return)
+            {
+                this.Visibility = Visibility.Collapsed;
+            }
             if (e.Key != Key.Down && e.Key != Key.Up && e.Key != Key.Tab && e.Key != Key.LeftShift && e.Key != Key.Return)
             {
                 MoveFocus();
@@ -127,7 +131,12 @@ namespace Hop.App.Views
                             int vkey = (((int)lParam >> 16) & 0xFFFF);
                             if (vkey == VK_SPACE)
                             {
-                                this.Visibility = this.Visibility == Visibility.Collapsed ? Visibility.Visible : Visibility.Collapsed;
+                                if (this.Visibility == Visibility.Collapsed)
+                                {
+                                    this.Visibility = Visibility.Visible;
+                                    this.QueryTextBox.Focus();
+                                }
+                                else this.Visibility = Visibility.Collapsed;
                             }
                             handled = true;
                             break;

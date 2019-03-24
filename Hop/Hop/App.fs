@@ -47,7 +47,7 @@ let hopModuleMain arguments =
 
 let init () =
     let loadedHop = load "Modules"
-    let hop = { loadedHop with Modules = loadedHop.Modules |> Map.add "Hop" (new Func<Arguments, Result> (hopModuleMain)) }
+    let hop = { loadedHop with Modules = loadedHop.Modules |> Map.add "Hop" (new Func<Arguments, Result> (hopModuleMain)) |> Map.add "FileSystem" (new Func<Arguments, Result> (FileSystemModule.main)) }
     let arguments = { Head = ""; Tail = [] }
     let result = execute arguments hop
     { Arguments = arguments; Items = result.Items; Hop = hop }
