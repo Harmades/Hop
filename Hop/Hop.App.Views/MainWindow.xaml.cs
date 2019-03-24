@@ -75,7 +75,8 @@ namespace Hop.App.Views
             this.ItemsListView.SelectedIndex = 0;
             this.ItemsListView.UpdateLayout();
             var item = this.ItemsListView.ItemContainerGenerator.ContainerFromIndex(0) as ListViewItem;
-            item?.Focus();
+            if (item != null) item.Focus();
+            else this.QueryTextBox.Focus();
         }
 
         private void FocusTextBox(object sender, KeyEventArgs e)

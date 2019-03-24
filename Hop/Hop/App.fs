@@ -24,7 +24,7 @@ type HopModule = | Hop | Reload
 
 let hopModuleMain arguments =
     match arguments.Tail with
-        | [] ->
+        | [] when arguments.Head = String.Empty || fuzzyMatch "Hop" arguments.Head < 3 ->
             Seq.singleton {
                 Name = "Hop"
                 Description = "Hop actions and settings"
