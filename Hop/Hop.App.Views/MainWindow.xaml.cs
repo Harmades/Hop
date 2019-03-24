@@ -9,6 +9,7 @@ using TrayIcon = System.Windows.Forms.NotifyIcon;
 using ContextMenuStrip = System.Windows.Forms.ContextMenuStrip;
 using ToolStripMenuItem = System.Windows.Forms.ToolStripMenuItem;
 using System.Drawing;
+using System.Windows.Media.Imaging;
 
 namespace Hop.App.Views
 {
@@ -36,6 +37,9 @@ namespace Hop.App.Views
         public MainWindow()
         {
             InitializeComponent();
+            var uri = new Uri("pack://application:,,,/Hop.App.Views;component/Hop.ico");
+            var stream = Application.GetResourceStream(uri);
+            this.TrayIcon.Icon = new Icon(stream.Stream);
             this.QueryTextBox.PreviewKeyDown += HandleKeyDown;
             this.ItemsListView.PreviewKeyDown += FocusTextBox;
             this.ItemsListView.TargetUpdated += ItemsUpdated;
@@ -55,7 +59,6 @@ namespace Hop.App.Views
             contextMenuStrip.Items.Add(openItem);
             contextMenuStrip.Items.Add(exitItem);
             this.TrayIcon.ContextMenuStrip = contextMenuStrip;
-            this.TrayIcon.Icon = new Icon("D:/Hop/Hop/Hop.App/bin/Debug/net472/assets/Hop.ico");
             this.TrayIcon.Visible = true;
             this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
         }

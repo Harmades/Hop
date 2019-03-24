@@ -7,6 +7,7 @@
              WindowStyle="None"
              ResizeMode="NoResize"
              mc:Ignorable="d"
+             Icon="Hop.ico"
              Width="700"
              Height="400">
     <Grid>

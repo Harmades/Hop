@@ -1,4 +1,8 @@
-﻿open System
+﻿module Hop.App
+
+open Hop.App.Views
+open Hop.Core
+open System
 open System.Windows
 open System.Windows.Input
 open System.ComponentModel

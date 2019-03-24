@@ -1,4 +1,4 @@
-﻿module FileSystemModule
+﻿module Hop.FileSystemModule
 
 open Hop.Core
 open System
@@ -9,7 +9,7 @@ let init () =
     {
         Name = "D:/"
         Description = String.Empty
-        Image = Path.GetFullPath "assets/Hopx40.png"
+        Image = "pack://application:,,,/Assets/Hopx40.png"
         Data = DirectoryInfo "D:/"
         Module = "FileSystem"
         Action = new Action (fun () -> Process.Start "D:/" |> ignore)
@@ -27,7 +27,7 @@ let main arguments =
         {
             Name = fsInfo.Name
             Description = sprintf "Date modified %s" (fsInfo.LastWriteTime.ToShortDateString())
-            Image = Path.GetFullPath "assets/Hopx40.png"
+            Image = "pack://application:,,,/Assets/Hopx40.png"
             Data = fsInfo
             Module = "FileSystem"
             Action = new Action (fun () -> Process.Start fsInfo.FullName |> ignore)
