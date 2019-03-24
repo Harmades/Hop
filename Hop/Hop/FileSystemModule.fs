@@ -9,7 +9,7 @@ let init () =
     {
         Name = "D:/"
         Description = String.Empty
-        Image = "pack://application:,,,/Assets/Hopx40.png"
+        Image = DefaultImage
         Data = DirectoryInfo "D:/"
         Module = "FileSystem"
         Action = new Action (fun () -> Process.Start "D:/" |> ignore)
@@ -27,7 +27,7 @@ let main arguments =
         {
             Name = fsInfo.Name
             Description = sprintf "Date modified %s" (fsInfo.LastWriteTime.ToShortDateString())
-            Image = "pack://application:,,,/Assets/Hopx40.png"
+            Image = DefaultImage
             Data = fsInfo
             Module = "FileSystem"
             Action = new Action (fun () -> Process.Start fsInfo.FullName |> ignore)

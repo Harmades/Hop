@@ -20,10 +20,35 @@ type Message =
     | Pop
     | Execute of Item
 
+type HopModule = | Hop | Reload
+
+let hopModuleMain arguments =
+    match arguments.Tail with
+        | [] ->
+            Seq.singleton {
+                Name = "Hop"
+                Description = "Hop actions and settings"
+                Image = DefaultImage
+                Data = Hop
+                Module = "Hop"
+                Action = new Action (id)
+            }
+        | head :: _ when obj.Equals (head.Data, Hop) ->
+            Seq.singleton {
+                Name = "Reload"
+                Description = "Reload modules"
+                Image = DefaultImage
+                Data = Reload
+                Module = "Hop"
+                Action = new Action (id)
+            }
+        | _ -> Seq.empty
+    |> (fun items -> { Items = items })
+
 let init () =
-    let main = FileSystemModule.main
-    let arguments = { Head = String.Empty; Tail = [FileSystemModule.init ()] }
-    let hop = { Modules = Map.empty |> Map.add "FileSystem" (Func<Arguments, Result>(main)) }
+    let loadedHop = load "Modules"
+    let hop = { loadedHop with Modules = loadedHop.Modules |> Map.add "Hop" (new Func<Arguments, Result> (hopModuleMain)) }
+    let arguments = { Head = ""; Tail = [] }
     let result = execute arguments hop
     { Arguments = arguments; Items = result.Items; Hop = hop }
 
@@ -45,16 +70,24 @@ let update model message =
                 | { Result.Items = items } ->
                     { model with Arguments = arguments; Items = items }
         | Pop ->
-            let arguments = { model.Arguments with Head = ""; Tail = model.Arguments.Tail.Tail }
+            let tail =
+                match model.Arguments.Tail with
+                    | [] -> []
+                    | _ :: tail -> tail
+            let arguments = { model.Arguments with Head = ""; Tail = tail }
             let result = execute arguments model.Hop
             { model with Arguments = arguments; Items = result.Items }
         | Query query ->
             let arguments = { model.Arguments with Head = query }
             let result = execute arguments model.Hop
             { model with Arguments = arguments; Items = result.Items }
+        | Execute item when obj.Equals (item, Reload) ->
+            init ()
         | Execute item ->
             item.Action.Invoke()
-            init ()
+            let arguments = { Head = ""; Tail = [] }
+            let result = execute arguments model.Hop
+            { model with Arguments = arguments; Items = result.Items }
 
 type ItemViewModel(model: Item) =
     member val Model = model with get, set

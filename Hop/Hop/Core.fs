@@ -3,8 +3,9 @@ module Hop.Core
 open System
 open System.Reflection
 open System.IO
+open System.Diagnostics
 
-
+let DefaultImage = "pack://application:,,,/Assets/Hopx40.png"
 
 type Item =
     {
@@ -48,18 +49,24 @@ type Hop =
         Modules: Map<string, Main>
     }
 
-let createFromAssemblies assemblies = assemblies |> List.map compose |> Map.ofList
-
 let load modulesDirectory =
     let mains =
-        Directory.GetFiles (modulesDirectory, "*.dll")
-        |> Array.map compose
+        try Directory.GetFiles (modulesDirectory, "*.dll") with | ex ->
+            Trace.WriteLine (ex.Message + " : " + ex.StackTrace)
+            Array.Empty<string>()
+        |> Array.choose (fun assembly ->
+            try assembly |> compose |> Some with ex ->
+                Trace.WriteLine (ex.Message + " : " + ex.StackTrace)
+                None)
         |> Map.ofArray
     { Modules = mains }
 
 let execute query hop =
     hop.Modules
-    |> Map.map (fun _ main -> main.Invoke query)
+    |> Map.map (fun _ main ->
+        try main.Invoke query with ex ->
+            Trace.WriteLine (ex.Message + " : " + ex.StackTrace)
+            { Items = Seq.empty })
     |> Map.toSeq
     |> Seq.collect (fun (_, m) -> m.Items)
     |> (fun items -> { Items = items })
