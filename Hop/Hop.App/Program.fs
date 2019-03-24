@@ -1,6 +1,4 @@
-﻿open Hop.Core.All
-open Hop.App.Views
-open System
+﻿open System
 open System.Windows
 open System.Windows.Input
 open System.ComponentModel

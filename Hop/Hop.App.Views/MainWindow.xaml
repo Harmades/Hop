@@ -45,7 +45,7 @@
             </ListView>
             <TextBox Grid.Column="1" Background="#282a36" Foreground="#bd93f9" BorderThickness="0" FontSize="20" VerticalAlignment="Stretch" VerticalContentAlignment="Center" Name="QueryTextBox" Text="{ Binding Query, UpdateSourceTrigger=PropertyChanged}" />
         </Grid>
-        <ListView Name="ItemsListView" Grid.Row="1" Background="#282a36" BorderThickness="0" ItemsSource="{ Binding Items, NotifyOnTargetUpdated=True}" Focusable="False">
+        <ListView Name="ItemsListView" Grid.Row="1" Background="#282a36" BorderThickness="0" ItemsSource="{ Binding Items, NotifyOnTargetUpdated=True}" Focusable="False" ScrollViewer.VerticalScrollBarVisibility="Hidden">
             <ListView.Resources>
                 <Style TargetType="{x:Type ListViewItem}">
                     <Setter Property="FocusVisualStyle" Value="{x:Null}" />
