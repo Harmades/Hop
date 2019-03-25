@@ -50,14 +50,18 @@ type Hop =
         Modules: Map<string, Main>
     }
 
+let logException (ex: Exception) =
+    sprintf "[%s] %s :%s%s" (DateTime.Now.ToString()) ex.Message Environment.NewLine ex.StackTrace
+    |> Trace.WriteLine
+
 let load modulesDirectory =
     let mains =
         try Directory.GetFiles (modulesDirectory, "*.dll") with | ex ->
-            Trace.WriteLine (ex.Message + " : " + ex.StackTrace)
+            logException ex
             Array.Empty<string>()
         |> Array.choose (fun assembly ->
             try assembly |> compose |> Some with ex ->
-                Trace.WriteLine (ex.Message + " : " + ex.StackTrace)
+                logException ex
                 None)
         |> Map.ofArray
     { Modules = mains }
@@ -66,7 +70,7 @@ let execute query hop =
     hop.Modules
     |> Map.map (fun _ main ->
         try main.Invoke query with ex ->
-            Trace.WriteLine (ex.Message + " : " + ex.StackTrace)
+            logException ex
             { Items = Seq.empty })
     |> Map.toSeq
     |> Seq.collect (fun (_, m) -> m.Items)

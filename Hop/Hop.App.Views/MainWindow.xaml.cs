@@ -28,7 +28,7 @@ namespace Hop.App.Views
 
         private const int HOTKEY_ID = 9000;
         private const uint MOD_ALT = 0x0001;
-        private const uint VK_SPACE = 0x20;
+        private const uint VK_C = 0x48;
         private const int WM_HOTKEY = 0x0312;
         private IntPtr _windowHandle;
         private HwndSource _source;
@@ -37,12 +37,15 @@ namespace Hop.App.Views
         public MainWindow()
         {
             InitializeComponent();
-            var uri = new Uri("pack://application:,,,/Hop.App.Views;component/Hop.ico");
-            var stream = Application.GetResourceStream(uri);
-            this.TrayIcon.Icon = new Icon(stream.Stream);
+            this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+
             this.QueryTextBox.PreviewKeyDown += HandleKeyDown;
             this.ItemsListView.PreviewKeyDown += FocusTextBox;
             this.ItemsListView.TargetUpdated += ItemsUpdated;
+
+            var uri = new Uri("pack://application:,,,/Hop.App.Views;component/Hop.ico");
+            var stream = Application.GetResourceStream(uri);
+            this.TrayIcon.Icon = new Icon(stream.Stream);
             var contextMenuStrip = new ContextMenuStrip();
             var openItem = new ToolStripMenuItem
             {
@@ -50,17 +53,16 @@ namespace Hop.App.Views
                 Text = "Open Hop"
             };
             openItem.Click += OpenHop;
+            contextMenuStrip.Items.Add(openItem);
             var exitItem = new ToolStripMenuItem
             {
                 Name = "Exit",
                 Text = "Exit"
             };
             exitItem.Click += Exit;
-            contextMenuStrip.Items.Add(openItem);
             contextMenuStrip.Items.Add(exitItem);
             this.TrayIcon.ContextMenuStrip = contextMenuStrip;
             this.TrayIcon.Visible = true;
-            this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
         }
 
         private void Exit(object sender, EventArgs e) => this.Close();
@@ -117,7 +119,7 @@ namespace Hop.App.Views
             _source = HwndSource.FromHwnd(_windowHandle);
             _source.AddHook(HwndHook);
 
-            RegisterHotKey(_windowHandle, HOTKEY_ID, MOD_ALT, VK_SPACE);
+            RegisterHotKey(_windowHandle, HOTKEY_ID, MOD_ALT, VK_C);
         }
 
         private IntPtr HwndHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
@@ -129,7 +131,7 @@ namespace Hop.App.Views
                     {
                         case HOTKEY_ID:
                             int vkey = (((int)lParam >> 16) & 0xFFFF);
-                            if (vkey == VK_SPACE)
+                            if (vkey == VK_C)
                             {
                                 if (this.Visibility == Visibility.Collapsed)
                                 {

@@ -8,12 +8,16 @@
   <ItemGroup>
     <Resource Include="Assets\Hopx25.png" />
     <Resource Include="Assets\Hopx40.png" />
+    <Content Include="Modules\Your modules here.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="App.config" />
     <None Include="packages.config" />
     <Compile Include="Core.fs" />
-    <Compile Include="FileSystemModule.fs" />
     <Compile Include="App.fs" />
   </ItemGroup>
+
+  <ItemGroup />
 
   <ItemGroup>
     <ProjectReference Include="..\Hop.App.Views\Hop.App.Views.csproj" />
