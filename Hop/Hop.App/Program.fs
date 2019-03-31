@@ -1,6 +1,4 @@
-﻿module Hop.App
-
-open Hop.App.Views
+﻿open Hop.App.Views
 open Hop.Core
 open System
 open System.ComponentModel

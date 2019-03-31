@@ -6,7 +6,7 @@ open System.Diagnostics
 open System.IO
 open System.Reflection
 
-let DefaultImage = "pack://application:,,,/Assets/Hopx40.png"
+let DefaultImage = "pack://application:,,,/Hop;component/Assets/Hopx40.png"
 
 type Item =
     {
