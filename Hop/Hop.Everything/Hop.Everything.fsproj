@@ -1,18 +1,27 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <OutputType>Library</OutputType>
     <Platforms>AnyCPU;x86</Platforms>
   </PropertyGroup>
-
+  
   <ItemGroup>
-    <Content Include="Assets\Hopx40.png">
+    <Content Include="Folderx32.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Compile Include="Core.fs" />
+    <Content Include="Everything32.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Compile Include="Module.fs" />
   </ItemGroup>
-
+  
+  <ItemGroup />
+  
+  <ItemGroup>
+    <ProjectReference Include="..\Hop\Hop.fsproj" />
+  </ItemGroup>
+  
   <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="4.6.2" />
   </ItemGroup>

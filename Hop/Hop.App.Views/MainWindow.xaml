@@ -11,6 +11,9 @@
              Width="700"
              Height="400"
              Background="#282a36">
+    <Window.Resources>
+        <local:ImageToBitmapSourceConverter x:Key="ImageConverter" />
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -41,13 +44,13 @@
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition />
                             </Grid.ColumnDefinitions>
-                            <Image Grid.Column="0" Margin="2 2 2 2" VerticalAlignment="Center" Source="{ Binding Image }" Width="20" />
+                            <Image Grid.Column="0" Margin="2 2 2 2" VerticalAlignment="Center" Source="{ Binding Image, Converter = { StaticResource ImageConverter } }" Width="16" />
                             <TextBlock Grid.Column="1" Margin="2 2 2 2" VerticalAlignment="Center" Foreground="#bd93f9" Text="{ Binding Name }" FontSize="20" />
                         </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-            <TextBox Grid.Column="2" Background="Transparent" Foreground="#bd93f9" BorderThickness="0" FontSize="20" VerticalAlignment="Stretch" VerticalContentAlignment="Center" Name="QueryTextBox" Text="{ Binding Query, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Grid.Column="2" Background="Transparent" Foreground="#bd93f9" BorderThickness="0" FontSize="20" VerticalAlignment="Stretch" VerticalContentAlignment="Center" Name="QueryTextBox" Text="{ Binding Query, UpdateSourceTrigger=PropertyChanged, Delay = 300 }" />
         </Grid>
         <ListView Name="ItemsListView" Grid.Row="1" BorderThickness="0" Background="Transparent" ItemsSource="{ Binding Items, NotifyOnTargetUpdated=True}" Focusable="False" ScrollViewer.VerticalScrollBarVisibility="Hidden">
             <ListView.Resources>
@@ -107,7 +110,7 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
-                        <Image Grid.Column="0" Margin="2 2 2 2" VerticalAlignment="Center" Source="{ Binding Image }" Width="40" />
+                        <Image Grid.Column="0" Margin="2 2 2 2" VerticalAlignment="Center" Source="{ Binding Image, Converter = { StaticResource ImageConverter } }" Width="32" />
                         <Grid Grid.Column="1">
                             <Grid.RowDefinitions>
                                 <RowDefinition />

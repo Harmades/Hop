@@ -27,10 +27,10 @@ type HopModule = | Hop | Reload | Logs
 let hopModuleMain arguments =
     match arguments.Tail with
         | [] when arguments.Head = String.Empty || fuzzyMatch "Hop" arguments.Head < 3 ->
-            Seq.singleton {
+            List.singleton {
                 Name = "Hop"
                 Description = "Hop actions and settings"
-                Image = DefaultImage
+                Image = defaultImage
                 Data = Hop
                 Module = "Hop"
                 Action = new Action (id)
@@ -39,7 +39,7 @@ let hopModuleMain arguments =
             [{
                 Name = "Reload"
                 Description = "Reload modules"
-                Image = DefaultImage
+                Image = defaultImage
                 Data = Reload
                 Module = "Hop"
                 Action = new Action (id)
@@ -47,7 +47,7 @@ let hopModuleMain arguments =
             {
                 Name = "Log"
                 Description = "Open error log"
-                Image = DefaultImage
+                Image = defaultImage
                 Data = None
                 Module = "Hop"
                 Action = new Action(fun () -> Process.Start errorsLog |> ignore)
@@ -55,13 +55,15 @@ let hopModuleMain arguments =
             |> List.filter (fun item ->
                 if arguments.Head = String.Empty then true
                 else fuzzyMatch item.Name arguments.Head < 3)
-            |> List.toSeq
-        | _ -> Seq.empty
+        | _ -> List.empty
     |> (fun items -> { Items = items })
 
 let init () =
-    let loadedHop = load modulesDirectory
-    let hop = { loadedHop with Modules = loadedHop.Modules |> Map.add "Hop" (new Func<Arguments, Result> (hopModuleMain)) }
+    let modules =
+        Map.empty<string, Main>
+        |> Map.add "Hop" (new Func<Arguments, Result> (hopModuleMain))
+        |> Map.add "Hop.Everything" (new Func<Arguments, Result> (Hop.Everything.main))
+    let hop = { Modules = modules }
     let arguments = { Head = ""; Tail = [] }
     let result = execute arguments hop
     { Arguments = arguments; Items = result.Items; Hop = hop }
@@ -135,7 +137,7 @@ let bind model = new MainViewModel(model)
 
 [<EntryPoint>]
 [<STAThread>]
-let main argv = 
+let main _ = 
     Trace.Listeners.Add (new TextWriterTraceListener (errorsLog, "HopListener")) |> ignore
     Trace.AutoFlush <- true
     let app = new Application ()

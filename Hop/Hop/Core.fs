@@ -3,16 +3,18 @@ module Hop.Core
 open System
 open System.Collections.Generic
 open System.Diagnostics
+open System.Drawing
 open System.IO
 open System.Reflection
 
-let DefaultImage = "pack://application:,,,/Hop;component/Assets/Hopx40.png"
+let defaultImage = new Bitmap "./Assets/Hopx40.png"
+let pageSize = 20
 
 type Item =
     {
         Name: string
         Description: string
-        Image: string
+        Image: Bitmap
         Data: obj
         Module: string
         Action: Action
@@ -26,7 +28,7 @@ type Arguments =
 
 type Result =
     {
-        Items: Item seq
+        Items: Item list
     }
 
 type Main = Func<Arguments, Result>
@@ -56,7 +58,10 @@ let logException (ex: Exception) =
 
 let load modulesDirectory =
     let mains =
-        try Directory.GetFiles (modulesDirectory, "*.dll") with | ex ->
+        try
+            Directory.GetDirectories modulesDirectory
+            |> Array.collect (fun directory -> Directory.GetFiles (directory, "Hop.*.dll"))
+        with | ex ->
             logException ex
             Array.Empty<string>()
         |> Array.choose (fun assembly ->
@@ -71,9 +76,9 @@ let execute query hop =
     |> Map.map (fun _ main ->
         try main.Invoke query with ex ->
             logException ex
-            { Items = Seq.empty })
-    |> Map.toSeq
-    |> Seq.collect (fun (_, m) -> m.Items)
+            { Items = List.empty })
+    |> Map.toList
+    |> List.collect (fun (_, m) -> if m.Items.Length <= pageSize then m.Items else m.Items |> List.take pageSize)
     |> (fun items -> { Items = items })
 
 let min3 a b c =
