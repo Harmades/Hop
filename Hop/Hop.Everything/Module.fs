@@ -2,6 +2,7 @@
 
 open Hop.Core
 open System
+open System.Diagnostics
 open System.Drawing
 open System.IO
 open System.Runtime.InteropServices
@@ -26,7 +27,7 @@ extern bool Everything_IsVolumeResult (uint32 nIndex)
 [<DllImport("Everything32.dll")>]
 extern int Everything_GetLastError ()
 [<DllImport("Everything32.dll")>]
-extern void Everything_CleanUp ()
+extern void Everything_Reset ()
 
 type FileSystemType =
     | File
@@ -97,9 +98,9 @@ let main (arguments: Arguments) =
                                 | _ -> defaultImage
                         Module = "Everything"
                         Data = None
-                        Action = new Action (id)
+                        Action = new Action (fun () -> Process.Start fs.FullPath |> ignore)
                     })
-            Everything_CleanUp()
+            Everything_Reset()
             results
         | _ -> List.empty
     |> (fun items -> { Items = items })

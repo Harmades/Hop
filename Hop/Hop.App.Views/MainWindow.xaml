@@ -50,7 +50,7 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-            <TextBox Grid.Column="2" Background="Transparent" Foreground="#bd93f9" BorderThickness="0" FontSize="20" VerticalAlignment="Stretch" VerticalContentAlignment="Center" Name="QueryTextBox" Text="{ Binding Query, UpdateSourceTrigger=PropertyChanged, Delay = 300 }" />
+            <TextBox Grid.Column="2" Background="Transparent" Foreground="#bd93f9" BorderThickness="0" FontSize="20" VerticalAlignment="Stretch" VerticalContentAlignment="Center" Name="QueryTextBox" Text="{ Binding Query, UpdateSourceTrigger=PropertyChanged, Delay = 100 }" />
         </Grid>
         <ListView Name="ItemsListView" Grid.Row="1" BorderThickness="0" Background="Transparent" ItemsSource="{ Binding Items, NotifyOnTargetUpdated=True}" Focusable="False" ScrollViewer.VerticalScrollBarVisibility="Hidden">
             <ListView.Resources>
