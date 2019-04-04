@@ -8,16 +8,16 @@ open System.IO
 open System.Runtime.InteropServices
 open System.Text
 
-[<DllImport("Everything32.dll")>]
-extern int Everything_SetSearch (string lpSearchString)
+[<DllImport("Everything32.dll", CharSet = CharSet.Unicode)>]
+extern int Everything_SetSearchW (string lpSearchString)
 [<DllImport("Everything32.dll")>]
 extern void Everything_SetMax (uint32 dwMax)
-[<DllImport("Everything32.dll")>]
-extern bool Everything_Query (bool bWait)
+[<DllImport("Everything32.dll", CharSet = CharSet.Unicode)>]
+extern bool Everything_QueryW (bool bWait)
 [<DllImport("Everything32.dll")>]
 extern int Everything_GetNumResults ()
-[<DllImport("Everything32.dll")>]
-extern void Everything_GetResultFullPathName (uint32 nIndex, StringBuilder lpString, uint32 nMaxCount)
+[<DllImport("Everything32.dll", CharSet = CharSet.Unicode)>]
+extern void Everything_GetResultFullPathNameW (uint32 nIndex, StringBuilder lpString, uint32 nMaxCount)
 [<DllImport("Everything32.dll")>]
 extern bool Everything_IsFileResult (uint32 nIndex)
 [<DllImport("Everything32.dll")>]
@@ -49,15 +49,15 @@ let folderBitmap = new Bitmap "./Folderx32.png"
 let bufferSize = 260
 
 let search query =
-    if Everything_SetSearch query = 0
+    if Everything_SetSearchW query = 0
     then
         Everything_SetMax (pageSize |> Convert.ToUInt32)
-        if Everything_Query true
+        if Everything_QueryW true
         then
             let resultCount = Everything_GetNumResults() |> Convert.ToInt32
             [for i in 0 .. resultCount - 1 ->
                 let builder = StringBuilder (bufferSize)
-                Everything_GetResultFullPathName (i |> Convert.ToUInt32, builder, bufferSize |> Convert.ToUInt32)
+                Everything_GetResultFullPathNameW (i |> Convert.ToUInt32, builder, bufferSize |> Convert.ToUInt32)
                 let path = builder.ToString()
                 let name = Path.GetFileName path
                 let fileSystemType =
