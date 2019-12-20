@@ -5,129 +5,85 @@ open System.ComponentModel
 open System.Diagnostics
 open System.Windows
 open System.Windows.Input
+open System.IO
+open System.Drawing
 
-let errorsLog = "Errors.log"
-let modulesDirectory = "Modules"
+let errorsLog = "errors.log"
+let modulesDirectory = "modules"
 
-type Model =
-    {
-        Arguments: Arguments
-        Items: Item seq
-        Hop: Hop
-    }
+type Model = {
+    Query: Query
+    Results: Item list
+    Hop: Hop
+}
 
 type Message =
-    | Query of string
+    | Search of string
     | Push of Item
     | Pop
     | Execute of Item
 
-type HopModule = | Hop | Reload | Logs
-
-let hopModuleMain arguments =
-    match arguments.Tail with
-        | [] when arguments.Head = String.Empty || fuzzyMatch "Hop" arguments.Head < 3 ->
-            List.singleton {
-                Name = "Hop"
-                Description = "Hop actions and settings"
-                Image = defaultImage
-                Data = Hop
-                Module = "Hop"
-                Action = new Action (id)
-            }
-        | head :: _ when obj.Equals (head.Data, Hop) ->
-            [{
-                Name = "Reload"
-                Description = "Reload modules"
-                Image = defaultImage
-                Data = Reload
-                Module = "Hop"
-                Action = new Action (id)
-            };
-            {
-                Name = "Log"
-                Description = "Open error log"
-                Image = defaultImage
-                Data = None
-                Module = "Hop"
-                Action = new Action(fun () -> Process.Start errorsLog |> ignore)
-            }]
-            |> List.filter (fun item ->
-                if arguments.Head = String.Empty then true
-                else fuzzyMatch item.Name arguments.Head < 3)
-        | _ -> List.empty
-    |> (fun items -> { Items = items })
-
 let init () =
-    let modules =
-        Map.empty<string, Main>
-        |> Map.add "Hop" (new Func<Arguments, Result> (hopModuleMain))
-        |> Map.add "Hop.Everything" (new Func<Arguments, Result> (Hop.Everything.main))
+    let modules = Directory.GetFiles ("./", "*.ps1") |> Array.map loadModule |> Array.toList
     let hop = { Modules = modules }
-    let arguments = { Head = ""; Tail = [] }
-    let result = execute arguments hop
-    { Arguments = arguments; Items = result.Items; Hop = hop }
+    let query = { Search = ""; Stack = []; Execute = false }
+    let results = execute query hop
+    { Query = query; Results = results; Hop = hop }
 
-let createCommand execute =
-    {
-        new ICommand with
-            member this.Execute (argument) = execute argument
-            member this.CanExecute (_) = true
-            member this.add_CanExecuteChanged(_) = ()
-            member this.remove_CanExecuteChanged(_) = ()
-    }
+let createCommand execute = {
+    new ICommand with
+        member this.Execute (argument) = execute argument
+        member this.CanExecute (_) = true
+        member this.add_CanExecuteChanged(_) = ()
+        member this.remove_CanExecuteChanged(_) = ()
+}
 
 let update model message =
     match message with
         | Push item ->
-            let arguments = { Head = ""; Tail = item :: model.Arguments.Tail }
-            match execute arguments model.Hop with
-                | { Result.Items = items } when Seq.isEmpty items -> model
-                | { Result.Items = items } ->
-                    { model with Arguments = arguments; Items = items }
+            let query = { Search = ""; Stack = item :: model.Query.Stack; Execute = false }
+            let results = execute query model.Hop
+            { model with Query = query; Results = results }
         | Pop ->
-            let tail =
-                match model.Arguments.Tail with
-                    | [] -> []
-                    | _ :: tail -> tail
-            let arguments = { model.Arguments with Head = ""; Tail = tail }
-            let result = execute arguments model.Hop
-            { model with Arguments = arguments; Items = result.Items }
-        | Query query ->
-            let arguments = { model.Arguments with Head = query }
-            let result = execute arguments model.Hop
-            { model with Arguments = arguments; Items = result.Items }
-        | Execute item when obj.Equals (item, Reload) ->
-            init ()
+            let query = { model.Query with Search = ""; Stack = if model.Query.Stack.IsEmpty then List.empty else model.Query.Stack.Tail }
+            let results = execute query model.Hop
+            { model with Query = query; Results = results }
+        | Search search ->
+            let query = { model.Query with Search = search }
+            let results = execute query model.Hop
+            { model with Query = query; Results = results }
         | Execute item ->
-            item.Action.Invoke()
-            let arguments = { Head = ""; Tail = [] }
-            let result = execute arguments model.Hop
-            { model with Arguments = arguments; Items = result.Items }
+            let query = { Search = ""; Stack = item :: model.Query.Stack; Execute = true }
+            execute query model.Hop |> ignore
+            { model with Query = { Search = ""; Stack = []; Execute = false }; Results = [] }
+
+let fromBytes (bytes: byte array) =
+    use stream = new MemoryStream(bytes)
+    Image.FromStream(stream)
 
 type ItemViewModel(model: Item) =
+    let image = if (model.Image = null || model.Image.Length = 0) then defaultImage else fromBytes model.Image
     member val Model = model with get, set
     member this.Name with get () = this.Model.Name
     member this.Description with get () = this.Model.Description
-    member this.Image with get () = this.Model.Image
-    member this.Module with get () = this.Model.Module
+    member this.Image with get () = image
 
 type MainViewModel(model: Model) =
     let ev = new Event<_,_>()
     member val Model = model with get, set
     member this.Query
-        with get () = this.Model.Arguments.Head
-        and set (value) = this.Update (Query value)
-    member this.Arguments = this.Model.Arguments.Tail |> List.map ItemViewModel |> List.rev
-    member this.Items = this.Model.Items |> Seq.map ItemViewModel
+        with get () = this.Model.Query.Search
+        and set (value) = this.Update (Search value)
+    member this.Stack = this.Model.Query.Stack |> List.map ItemViewModel |> List.rev
+    member this.Results = this.Model.Results |> Seq.map ItemViewModel
     member this.PushCommand = createCommand (fun o -> this.Update (Push (o :?> ItemViewModel).Model))
     member this.PopCommand = createCommand (fun _ -> this.Update Pop)
     member this.ExecuteCommand = createCommand (fun o -> this.Update (Execute (o :?> ItemViewModel).Model))
     member private this.Update message =
         this.Model <- update this.Model message
         ev.Trigger (this, new PropertyChangedEventArgs "Query")
-        ev.Trigger (this, new PropertyChangedEventArgs "Items")
-        ev.Trigger (this, new PropertyChangedEventArgs "Arguments")
+        ev.Trigger (this, new PropertyChangedEventArgs "Results")
+        ev.Trigger (this, new PropertyChangedEventArgs "Stack")
 
     interface INotifyPropertyChanged with
         [<CLIEvent>]

@@ -1,85 +1,64 @@
-module Hop.Core
+﻿module Hop.Core
 
-open System
-open System.Collections.Generic
-open System.Diagnostics
-open System.Drawing
 open System.IO
-open System.Reflection
+open System
+open System.Diagnostics
+open Newtonsoft.Json
+open System.Collections.Generic
+open System.Drawing
+open Newtonsoft.Json.Linq
+open System.Management.Automation
 
-let defaultImage = new Bitmap "./Assets/Hopx40.png"
+let defaultImage = Image.FromFile "./Assets/Hopx40.png"
 let pageSize = 20
 
-type Item =
-    {
-        Name: string
-        Description: string
-        Image: Bitmap
-        Data: obj
-        Module: string
-        Action: Action
-    }
+type Item() =
+    member val Name = "" with get, set
+    member val Description = "" with get, set
+    member val Image = Array.Empty<byte>() with get, set
+    [<JsonExtensionData>] member val Data = new Dictionary<string, JToken>() with get, set
 
-type Arguments =
-    {
-        Head: string
-        Tail: Item list
-    }
 
-type Result =
-    {
-        Items: Item list
-    }
+type Query = {
+    Search: string
+    Execute: bool
+    Stack: Item list
+}
 
-type Main = Func<Arguments, Result>
+type Module = {
+    Name: string
+    Path: string
+}
 
-[<AllowNullLiteral>]
-type ModuleEntryPointAttribute () = inherit Attribute ()
+type Hop = {
+    Modules: Module list
+}
 
-let findMain (assembly: Assembly) =
-    let entryPoint =
-        assembly.GetExportedTypes ()
-        |> Array.collect(fun t -> t.GetMethods ())
-        |> Array.filter(fun m -> m.GetCustomAttribute<ModuleEntryPointAttribute> () <> null)
-        |> Array.map(fun m -> Delegate.CreateDelegate (typeof<Main>, m) :?> Main)
-        |> Array.head
-    assembly.FullName, entryPoint
-
-let compose = Assembly.LoadFrom >> findMain
-
-type Hop =
-    {
-        Modules: Map<string, Main>
-    }
+let executeModule query hopModule =
+    use powershell = PowerShell.Create()
+    powershell.AddScript(File.ReadAllText hopModule.Path) |> ignore
+    powershell.AddArgument query |> ignore
+    let output = powershell.Invoke() |> Seq.last
+    output.ToString()
 
 let logException (ex: Exception) =
     sprintf "[%s] %s :%s%s" (DateTime.Now.ToString()) ex.Message Environment.NewLine ex.StackTrace
     |> Trace.WriteLine
 
-let load modulesDirectory =
-    let mains =
-        try
-            Directory.GetDirectories modulesDirectory
-            |> Array.collect (fun directory -> Directory.GetFiles (directory, "Hop.*.dll"))
-        with | ex ->
-            logException ex
-            Array.Empty<string>()
-        |> Array.choose (fun assembly ->
-            try assembly |> compose |> Some with ex ->
-                logException ex
-                None)
-        |> Map.ofArray
-    { Modules = mains }
-
 let execute query hop =
+    let json = query |> JsonConvert.SerializeObject
     hop.Modules
-    |> Map.map (fun _ main ->
-        try main.Invoke query with ex ->
-            logException ex
-            { Items = List.empty })
-    |> Map.toList
-    |> List.collect (fun (_, m) -> if m.Items.Length <= pageSize then m.Items else m.Items |> List.take pageSize)
-    |> (fun items -> { Items = items })
+    |> List.collect (fun m ->
+        try
+            executeModule json m |> JsonConvert.DeserializeObject<Item list>
+        with
+            ex -> logException ex; []
+    )
+
+let loadModule script = {
+    Name = Path.GetFileName script
+    Path = script
+}
 
 let min3 a b c =
     min a (min b c)
