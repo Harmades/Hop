@@ -9,11 +9,10 @@ open System.IO
 open System.Drawing
 
 let errorsLog = "errors.log"
-let modulesDirectory = "modules"
 
 type Model = {
     Query: Query
-    Results: Item list
+    Results: Item seq
     Hop: Hop
 }
 
@@ -24,8 +23,7 @@ type Message =
     | Execute of Item
 
 let init () =
-    let modules = Directory.GetFiles ("./", "*.ps1") |> Array.map loadModule |> Array.toList
-    let hop = { Modules = modules }
+    let hop = load()
     let query = { Search = ""; Stack = []; Execute = false }
     let results = execute query hop
     { Query = query; Results = results; Hop = hop }
@@ -62,11 +60,10 @@ let fromBytes (bytes: byte array) =
     Image.FromStream(stream)
 
 type ItemViewModel(model: Item) =
-    let image = if (model.Image = null || model.Image.Length = 0) then defaultImage else fromBytes model.Image
     member val Model = model with get, set
     member this.Name with get () = this.Model.Name
     member this.Description with get () = this.Model.Description
-    member this.Image with get () = image
+    member this.Image with get () = this.Model.Image.Value
 
 type MainViewModel(model: Model) =
     let ev = new Event<_,_>()

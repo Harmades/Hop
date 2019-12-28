@@ -4,7 +4,7 @@ using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.IO;
 
-namespace Hop.FileSystem
+namespace Hop.FileSystem.Thumbnail
 {
     [Flags]
     public enum ThumbnailOptions
@@ -17,7 +17,7 @@ namespace Hop.FileSystem
         InCacheOnly = 0x10,
     }
 
-    public class ThumbnailGenerator
+    public class Thumbnail
     {
         private const string IShellItem2Guid = "7E9FB0D3-919F-4307-AB2E-9B1860310C93";
 

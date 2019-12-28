@@ -1,23 +1,20 @@
 ﻿module Hop.Core
 
-open System.IO
 open System
 open System.Diagnostics
-open Newtonsoft.Json
 open System.Collections.Generic
 open System.Drawing
-open Newtonsoft.Json.Linq
-open System.Management.Automation
+open System.ComponentModel.Composition.Hosting
+open System.ComponentModel.Composition
 
-let defaultImage = Image.FromFile "./Assets/Hopx40.png"
+let defaultImage = Image.FromFile "./assets/hopx40.png"
 let pageSize = 20
 
-type Item() =
-    member val Name = "" with get, set
-    member val Description = "" with get, set
-    member val Image = Array.Empty<byte>() with get, set
-    [<JsonExtensionData>] member val Data = new Dictionary<string, JToken>() with get, set
-
+type Item(name: string, description: string, image: Lazy<Image>, data: obj) =
+    member this.Name = name
+    member this.Description = description
+    member this.Image = image
+    member this.Data = data
 
 type Query = {
     Search: string
@@ -25,40 +22,35 @@ type Query = {
     Stack: Item list
 }
 
-type Module = {
-    Name: string
-    Path: string
-}
+[<InheritedExport>]
+type IModule =
+    abstract member Name: string
+    abstract member Query: Query -> Item seq
 
 type Hop = {
-    Modules: Module list
+    Modules: IModule list
 }
-
-let executeModule query hopModule =
-    use powershell = PowerShell.Create()
-    powershell.AddScript(File.ReadAllText hopModule.Path) |> ignore
-    powershell.AddArgument query |> ignore
-    let output = powershell.Invoke() |> Seq.last
-    output.ToString()
 
 let logException (ex: Exception) =
     sprintf "[%s] %s :%s%s" (DateTime.Now.ToString()) ex.Message Environment.NewLine ex.StackTrace
     |> Trace.WriteLine
 
-let execute query hop =
-    let json = query |> JsonConvert.SerializeObject
-    hop.Modules
-    |> List.collect (fun m ->
-        try
-            executeModule json m |> JsonConvert.DeserializeObject<Item list>
-        with
-            ex -> logException ex; []
-    )
+let executeModule (query: Query) (hopModule: IModule) =
+    try
+        hopModule.Query query
+    with
+        ex -> logException ex; Seq.empty
 
-let loadModule script = {
-    Name = Path.GetFileName script
-    Path = script
-}
+let execute query hop =
+    hop.Modules
+    |> Seq.collect (executeModule query)
+
+let load() =
+    use catalog = new AggregateCatalog()
+    catalog.Catalogs.Add(new DirectoryCatalog("./modules"))
+    use container = new CompositionContainer(catalog)
+    let modules = container.GetExportedValues<IModule>() |> List.ofSeq
+    { Modules = modules }
 
 let min3 a b c =
     min a (min b c)
