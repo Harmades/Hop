@@ -64,15 +64,13 @@ let memoize(f) =
         cache.Add(x, v)
         v)
 
-let rec private fuzzyMatchImpl (a: string) (b: string) =
+let rec fuzzyMatch (a: string) (b: string) =
     match a, b with
         | c, _ when c.Length = 0 -> b.Length
         | _, d when d.Length = 0 -> a.Length
         | _, _ ->
             let cost = if String.Equals(a, b, StringComparison.InvariantCultureIgnoreCase) then 0 else 1
             min3
-                (fuzzyMatchImpl a.[0 .. a.Length - 2] b + 1)
-                (fuzzyMatchImpl a b.[0 .. b.Length - 2] + 1)
-                (fuzzyMatchImpl a.[0 .. a.Length - 2] b.[0 .. b.Length - 2] + cost)
-
-let fuzzyMatch = fuzzyMatchImpl >> memoize
+                (fuzzyMatch a.[0 .. a.Length - 2] b + 1)
+                (fuzzyMatch a b.[0 .. b.Length - 2] + 1)
+                (fuzzyMatch a.[0 .. a.Length - 2] b.[0 .. b.Length - 2] + cost)

@@ -44,7 +44,7 @@
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition />
                             </Grid.ColumnDefinitions>
-                            <Image Grid.Column="0" Margin="2 2 2 2" VerticalAlignment="Center" Source="{ Binding Image, Converter = { StaticResource ImageConverter } }" Width="16" />
+                            <Image Grid.Column="0" Margin="2 2 2 2" VerticalAlignment="Center" Source="{ Binding Image, Converter = {StaticResource ImageConverter } }" Width="16" />
                             <TextBlock Grid.Column="1" Margin="2 2 2 2" VerticalAlignment="Center" Foreground="#bd93f9" Text="{ Binding Name }" FontSize="20" />
                         </Grid>
                     </DataTemplate>
@@ -100,7 +100,6 @@
             </ListView.Resources>
             <ListView.InputBindings>
                 <KeyBinding Key="Tab" Command="{ Binding PushCommand }" CommandParameter="{ Binding ElementName=ItemsListView, Path=SelectedItem }" />
-                <KeyBinding Modifiers="Shift" Key="Tab" Command="{ Binding PopCommand }" />
                 <KeyBinding Key="Return" Command="{ Binding ExecuteCommand }" CommandParameter="{ Binding ElementName=ItemsListView, Path=SelectedItem }" />
             </ListView.InputBindings>
             <ListView.ItemTemplate>
@@ -110,7 +109,7 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
-                        <Image Grid.Column="0" Margin="2 2 2 2" VerticalAlignment="Center" Source="{ Binding Image, Converter = { StaticResource ImageConverter } }" Width="32" />
+                        <Image Grid.Column="0" Margin="2 2 2 2" VerticalAlignment="Center" Source="{ Binding Image, Converter = {StaticResource ImageConverter } }" Width="32" />
                         <Grid Grid.Column="1">
                             <Grid.RowDefinitions>
                                 <RowDefinition />
@@ -123,5 +122,8 @@
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
+        <Grid.InputBindings>
+            <KeyBinding Modifiers="Shift" Key="Tab" Command="{ Binding PopCommand }" />
+        </Grid.InputBindings>
     </Grid>
 </Window>

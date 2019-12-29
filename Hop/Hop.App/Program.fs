@@ -5,8 +5,6 @@ open System.ComponentModel
 open System.Diagnostics
 open System.Windows
 open System.Windows.Input
-open System.IO
-open System.Drawing
 
 let errorsLog = "errors.log"
 
@@ -52,12 +50,10 @@ let update model message =
             { model with Query = query; Results = results }
         | Execute item ->
             let query = { Search = ""; Stack = item :: model.Query.Stack; Execute = true }
-            execute query model.Hop |> ignore
-            { model with Query = { Search = ""; Stack = []; Execute = false }; Results = [] }
-
-let fromBytes (bytes: byte array) =
-    use stream = new MemoryStream(bytes)
-    Image.FromStream(stream)
+            execute query model.Hop |> Seq.toList |> ignore
+            let resetQuery = { Search = ""; Stack = []; Execute = false }
+            let results = execute resetQuery model.Hop
+            { model with Query = resetQuery; Results = results }
 
 type ItemViewModel(model: Item) =
     member val Model = model with get, set
